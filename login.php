@@ -139,20 +139,21 @@ if (!$dbcon) {
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <a href="custmrdshbrd.php">Home</a>
-        <a href="fabric.php">Fabric</a>
-        <a href="abt.php">About</a>
-        <a href="contact1.php">Contact</a>
+<div class="navbar">
+        <a href="staffdshbrd.php">Home</a>
+        <a href="ManageOrder.php">Orders</a>
+        <a href="measurement.php">Measurement</a>
         <?php
-        if($_SESSION["USER_ID"]==null){
-           echo "<a href='login.php'>Login</a>";
-        }else{
+        session_start();
+        if (!isset($_SESSION["USER_ID"])) {
+            echo "<a href='login.php'>Login</a>";
+        } else {
             echo "<a href='logout.php'>Logout</a>";
+            echo "<a href='staff_profile.php'>Profile</a>";
         }
         ?>
-        <a href="customize1.php" class="customize-button">Customize Now</a>
     </div>
+
 
     <div class="form-container">
         <h2>Welcome Back!</h2>
@@ -185,18 +186,26 @@ if (!$dbcon) {
             $user = mysqli_fetch_array($data);
             if ($user['USERNAME'] == $username) {
                 // Check if user is blocked
-                if ($user['blocked'] == 1) { // Assuming 'blocked' is the column name for blocked status
+                if ($user['blocked'] == 1) {
                     echo "<script>alert('Your account is blocked. Please contact support.');</script>";
                 } else {
                     $_SESSION["USER_ID"] = $user['USER_ID'];
-                    
-                    if ($_SESSION["KEY"] == 'to-customise-dress') {
-                        echo "<script>alert('Login successful!'); window.location.href='customize1.php';</script>";
+                    $_SESSION["USER_TYPE"] = $user['USER_TYPE'];  // Set user type in session
+
+                    // Redirect based on user type
+                    if ($_SESSION["USER_TYPE"] == 'ADMIN') {
+                        echo "<script>alert('Login successful!'); window.location.href='admindshbrd.html';</script>";
+                    } elseif ($_SESSION["USER_TYPE"] == 'STAFF') {
+                        echo "<script>alert('Login successful!'); window.location.href='staffdshbrd.php';</script>";
+                    } elseif ($_SESSION["USER_TYPE"] == 'CUSTOMER') {
+                        if ($_SESSION["KEY"] == 'to-customise-dress') {
+                            echo "<script>alert('Login successful!'); window.location.href='customize1.php';</script>";
+                        } elseif ($_SESSION["KEY"] == 'to-buy-dress') {
+                            echo "<script>alert('Login successful!'); window.location.href='dress_details.php?id=" . $_SESSION['DRESS_ID'] . "';</script>";
+                        } else {
+                            echo "<script>alert('Login successful!'); window.location.href='custmrdshbrd.php';</script>";
+                        }
                     }
-                    if ($_SESSION["KEY"] == 'to-buy-dress') {
-                        echo "<script>alert('Login successful!'); window.location.href='dress_details.php?id=" . $_SESSION['DRESS_ID'] . "';</script>";
-                    }
-                    echo "<script>alert('Login successful!'); window.location.href='custmrdshbrd.php';</script>";
                 }
             } else {
                 echo "<script>alert('Invalid username or password!');</script>";
